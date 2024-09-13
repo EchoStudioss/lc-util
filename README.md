@@ -1,6 +1,6 @@
 # LuaCat: Vehicle and Item Management Script for FiveM Servers
 
-LuaCat is a Python script designed to automate vehicle and item management for FiveM servers. It simplifies the process of extracting vehicle model names from `vehicles.meta` files and adding items to Ox Inventory, ensuring better resource management and faster configuration.
+designed to automate vehicle and item management for FiveM servers. It simplifies the process of extracting vehicle model names from `vehicles.meta` files and adding items to Ox Inventory, ensuring better resource management and faster configuration.
 
 ## Features
 - **Extract Vehicle Models:** Scans `vehicles.meta` files and extracts `<modelName>` values, saving them in a format compatible with QB-Core's `shared/vehicles.lua`.
