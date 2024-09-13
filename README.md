@@ -1,3 +1,6 @@
+This script is licensed under the GPLv3. However, redistribution of this script, in whole or in part, is strictly prohibited without the explicit written permission of the author.
+
+
 # LuaCat: Vehicle and Item Management Script for FiveM Servers
 
 designed to automate vehicle and item management for FiveM servers. It simplifies the process of extracting vehicle model names from `vehicles.meta` files and adding items to Ox Inventory, ensuring better resource management and faster configuration.
