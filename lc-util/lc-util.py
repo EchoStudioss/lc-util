@@ -161,9 +161,9 @@ def save_weapons_to_text_file(weapons):
                         f"[{weapon['name']}] = {{\n"
                         f"    name = '{weapon['name']}',\n"
                         f"    label = '{weapon['label']}',\n"
-                        f"    weapontype = '{weapon['weapontype']}',\n"
+                        f"    weapontype = '{weapontype}',\n"
                         f"    ammotype = '{ammo_type}',\n"
-                        f"    damagereason = '{weapon['damagereason']}'\n"
+                        f"    damagereason = '{damagereason}'\n"
                         f"}}}},\n"
                     )
                 file.write(weapon_entry)
