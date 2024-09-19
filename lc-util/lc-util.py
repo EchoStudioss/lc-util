@@ -157,18 +157,13 @@ def save_weapons_to_text_file(weapons):
                         f"}}}},\n"
                     )
                 elif framework == 'qbcore':
-                    # Ensure we have the correct ammo type
-                    ammotype = ammo_conversion[framework].get(weapon['ammotype'], 'UNKNOWN_TYPE')
-                    # Default values for weapontype and damagereason if they are not provided
-                    weapontype = weapon.get('weapontype', 'UNKNOWN_TYPE')
-                    damagereason = weapon.get('damagereason', 'UNKNOWN_REASON')
                     weapon_entry = (
                         f"[{weapon['name']}] = {{\n"
                         f"    name = '{weapon['name']}',\n"
                         f"    label = '{weapon['label']}',\n"
-                        f"    weapontype = '{weapontype}',\n"
-                        f"    ammotype = '{ammotype}',\n"
-                        f"    damagereason = '{damagereason}'\n"
+                        f"    weapontype = '{weapon['weapontype']}',\n"
+                        f"    ammotype = '{ammo_type}',\n"
+                        f"    damagereason = '{weapon['damagereason']}'\n"
                         f"}}}},\n"
                     )
                 file.write(weapon_entry)
@@ -204,9 +199,7 @@ def add_weapons_from_meta_recursive(folder_path):
                             "label": weapon_name.capitalize(),
                             "weight": 3000,
                             "durability": 0.05,
-                            "ammotype": ammo_type,
-                            "weapontype": 'UNKNOWN_TYPE',  # Ensure this is handled or provided
-                            "damagereason": 'UNKNOWN_REASON'  # Ensure this is handled or provided
+                            "ammotype": ammo_type
                         }
                         weapons.append(weapon_entry)
                         
@@ -215,17 +208,73 @@ def add_weapons_from_meta_recursive(folder_path):
                             ammo_matches.pop(0)
     return weapons
 
-
 def select_folder_and_add_weapons():
     folder_path = filedialog.askdirectory() 
     if folder_path:
         weapons = add_weapons_from_meta_recursive(folder_path)  
-        if weapons:
-            save_weapons_to_text_file(weapons)
-        else:
-            messagebox.showinfo("No Data", "No weapon data found in the selected folder.")
+        save_weapons_to_text_file(weapons)
     else:
         messagebox.showerror("Error", "No folder selected.")
+
+def add_vehicles_from_meta_recursive(folder_path):
+    vehicles = []
+    model_name_pattern = re.compile(r'<modelName>(\w+)</modelName>')  # Pattern to extract model names
+
+
+    for file_name in os.listdir(folder_path):
+        if file_name == 'vehicles.meta':  # Look for the vehicles.meta file
+            file_path = os.path.join(folder_path, file_name)
+            with open(file_path, 'r') as file:
+                content = file.read()  # Read the file content
+                matches = model_name_pattern.findall(content)  # Find all model names
+
+
+                for match in matches:
+                    vehicle_entry = {
+                        "model": match.lower(),  # Convert model name to lowercase
+                        "name": match.capitalize(),  # Capitalize the model name for the name
+                        "brand": "Unknown",  # Default brand, can be customized
+                        "price": 20000,  # Default price, can be customized
+                        "category": "unknown",  # Default category
+                        "type": "automobile",  # Default type
+                        "shop": "pdm"  # Default shop
+                    }
+                    vehicles.append(vehicle_entry)
+    return vehicles
+
+
+
+
+
+def save_vehicles_to_text_file(vehicles):
+    framework = selected_framework.get()
+    
+    try:
+        with open(VEHICLES_OUTPUT_FILE, 'w') as file:
+            if framework == 'esx':
+                for vehicle in vehicles:
+                    file.write(
+                        f"INSERT INTO `vehicles` (`name`, `model`, `price`, `category`, `type`, `shop`) VALUES "
+                        f"('{vehicle['name']}', '{vehicle['model']}', {vehicle['price']}, '{vehicle['category']}', '{vehicle['type']}', '{vehicle['shop']}');\n"
+                    )
+            elif framework == 'qbcore':
+                for vehicle in vehicles:
+                    file.write(
+                        f"[{vehicle['name']}] = {{\n"
+                        f"    name = '{vehicle['name']}',\n"
+                        f"    model = '{vehicle['model']}',\n"
+                        f"    price = {vehicle['price']},\n"
+                        f"    category = '{vehicle['category']}',\n"
+                        f"    type = '{vehicle['type']}',\n"
+                        f"    shop = '{vehicle['shop']}'\n"
+                        f"}}}},\n"  # Escaping curly braces
+                    )
+            # Add an else statement if you have other frameworks to handle
+        print(f"Vehicles saved to {VEHICLES_OUTPUT_FILE}")
+    except Exception as e:
+        print(f"An error occurred while saving vehicles: {e}")
+
+
 
 def select_folder_and_add_vehicles():
     folder_path = filedialog.askdirectory() 
@@ -235,45 +284,42 @@ def select_folder_and_add_vehicles():
     else:
         messagebox.showerror("Error", "No folder selected.")
 
-def update_buttons():
-    framework = selected_framework.get()
+def update_ui_for_framework(framework):
+    for widget in root.winfo_children():
+        widget.pack_forget()  # Clear previous widgets
+    
+    framework_label.pack(pady=10)
+    framework_menu.pack(pady=10)
+    
     if framework == 'ox_inventory':
-        add_items_btn.pack(side='left', padx=5, pady=5)
-        add_weapons_btn.pack(side='left', padx=5, pady=5)
-        add_vehicles_btn.pack_forget()
+        add_items_button.pack(pady=10)
+        add_weapons_button.pack(pady=10)
     elif framework == 'esx':
-        add_items_btn.pack_forget()
-        add_weapons_btn.pack_forget()
-        add_vehicles_btn.pack(side='left', padx=5, pady=5)
+        add_vehicles_button.pack(pady=10)
     elif framework == 'qbcore':
-        add_items_btn.pack(side='left', padx=5, pady=5)
-        add_weapons_btn.pack(side='left', padx=5, pady=5)
-        add_vehicles_btn.pack(side='left', padx=5, pady=5)
+        add_items_button.pack(pady=10)
+        add_weapons_button.pack(pady=10)
+        add_vehicles_button.pack(pady=10)
 
-# GUI setup
+def on_framework_selection(event):
+    selected_framework.set(event.widget.get())
+    update_ui_for_framework(selected_framework.get())
+
 root = tk.Tk()
-root.title("Script Generator")
+root.title("Data Management Tool")
 root.geometry("600x400")
 root.configure(bg=BACKGROUND_COLOR)
 
-# Framework selection
-selected_framework = tk.StringVar(value='ox_inventory')
-framework_label = tk.Label(root, text="Select Framework:", font=FONT_LABEL, bg=BACKGROUND_COLOR, fg=TEXT_COLOR)
-framework_label.pack(pady=10)
+selected_framework = tk.StringVar(value='qbcore')
 
-frameworks = ['ox_inventory', 'esx', 'qbcore']
-for framework in frameworks:
-    rb = tk.Radiobutton(root, text=framework, variable=selected_framework, value=framework, bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=FONT_LABEL, selectcolor=BUTTON_COLOR)
-    rb.pack(anchor='w', padx=20)
+framework_label = tk.Label(root, text="Select Framework:", bg=BACKGROUND_COLOR, fg=TEXT_COLOR, font=FONT_LABEL)
+framework_menu = ttk.Combobox(root, textvariable=selected_framework, values=['ox_inventory', 'esx', 'qbcore'])
+framework_menu.bind("<<ComboboxSelected>>", on_framework_selection)
 
-# Buttons
-add_items_btn = tk.Button(root, text="Add Items", command=lambda: add_items('images'), bg=BUTTON_COLOR, fg=TEXT_COLOR, font=FONT_LABEL)
-add_weapons_btn = tk.Button(root, text="Add Weapons", command=select_folder_and_add_weapons, bg=BUTTON_COLOR, fg=TEXT_COLOR, font=FONT_LABEL)
-add_vehicles_btn = tk.Button(root, text="Add Vehicles", command=select_folder_and_add_vehicles, bg=BUTTON_COLOR, fg=TEXT_COLOR, font=FONT_LABEL)
+add_items_button = tk.Button(root, text="Add Items", command=lambda: add_items('images'), bg=BUTTON_COLOR, fg=TEXT_COLOR, font=FONT_LABEL)
+add_weapons_button = tk.Button(root, text="Add Weapons", command=select_folder_and_add_weapons, bg=BUTTON_COLOR, fg=TEXT_COLOR, font=FONT_LABEL)
+add_vehicles_button = tk.Button(root, text="Add Vehicles", command=select_folder_and_add_vehicles, bg=BUTTON_COLOR, fg=TEXT_COLOR, font=FONT_LABEL)
 
-update_buttons()
-
-# Update buttons when framework changes
-selected_framework.trace("w", lambda *args: update_buttons())
+update_ui_for_framework(selected_framework.get())
 
 root.mainloop()
