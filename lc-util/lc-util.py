@@ -16,7 +16,6 @@ ITEMS_OUTPUT_FILE = os.path.join(script_dir, ITEMS_OUTPUT_FILE)
 VEHICLES_OUTPUT_FILE = os.path.join(script_dir, VEHICLES_OUTPUT_FILE)
 WEAPONS_OUTPUT_FILE = os.path.join(script_dir, WEAPONS_OUTPUT_FILE)
 
-# Color and font settings
 BACKGROUND_COLOR = "#2c3e50"
 BUTTON_COLOR = "#3498db"
 TEXT_COLOR = "#ecf0f1"
@@ -38,7 +37,7 @@ ammo_conversion = {
 }
 
 def set_theme(root):
-    sv_ttk.set_theme("dark")  # Set the Sun Valley theme to dark
+    sv_ttk.set_theme("dark") 
 
 def add_items_from_images(folder_path):
     items = []
@@ -64,7 +63,6 @@ def add_items(item_type):
         else:
             messagebox.showerror("Error", "No folder selected.")
             return
-    # Additional item type handling can be added here...
 
     save_items_to_text_file(items)
 
@@ -231,7 +229,6 @@ def create_widgets(root):
     framework_label.pack(pady=10)
     framework_menu.pack(pady=10)
 
-    # Initially display buttons based on default selection
     update_ui_for_framework(selected_framework.get())
 
 def on_framework_selection(event):
@@ -239,7 +236,6 @@ def on_framework_selection(event):
     update_ui_for_framework(selected_framework.get())
 
 def update_ui_for_framework(framework):
-    # Hide or show buttons based on selected framework
     if framework == 'qbcore':
         add_items_button.pack(pady=10)
         add_weapons_button.pack(pady=10)
@@ -253,13 +249,12 @@ def update_ui_for_framework(framework):
         add_weapons_button.pack_forget()
         add_vehicles_button.pack(pady=10)
 
-# Main application setup
 root = tk.Tk()
 root.title("Data Management Tool")
 root.geometry("600x400")
-set_theme(root)  # Set theme
+set_theme(root) 
 
 selected_framework = tk.StringVar(value='qbcore')
-create_widgets(root)  # Create initial widgets
+create_widgets(root) 
 
 root.mainloop()
